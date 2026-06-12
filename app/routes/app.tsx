@@ -1,4 +1,31 @@
+import { json, redirect, type LoaderFunction } from "@remix-run/node";
 import { Outlet, Link, useLocation } from "@remix-run/react";
+import { requireUserId } from "~/utils/auth.server";
+import { supabaseAdmin } from "~/utils/supabase.server";
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const userId = await requireUserId(request);
+  const url = new URL(request.url);
+
+  // If already on the onboarding page, do not guard redirect to prevent infinite loops
+  if (url.pathname === "/app/onboarding") {
+    return json({ user: { id: userId }, business: null });
+  }
+
+  // Fetch business profile to check onboarding completion
+  const { data: business, error } = await supabaseAdmin
+    .from("businesses")
+    .select("phone, verification_status")
+    .eq("owner_id", userId)
+    .single();
+
+  // If business record doesn't exist, or doesn't have phone (meaning onboarding incomplete), redirect to onboarding
+  if (error || !business || !business.phone) {
+    return redirect("/app/onboarding");
+  }
+
+  return json({ user: { id: userId }, business });
+};
 
 export default function AppLayout() {
   const location = useLocation();
