@@ -5,7 +5,7 @@ import {
   unstable_createMemoryUploadHandler,
   type LoaderFunction,
   type ActionFunction,
-} from "@remix-run/node";
+} from "@remix-run/cloudflare";
 import { useLoaderData, useActionData, useSubmit, useNavigation, Form } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";

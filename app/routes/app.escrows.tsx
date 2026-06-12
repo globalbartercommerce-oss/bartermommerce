@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { json, type LoaderFunction, type ActionFunction } from "@remix-run/node";
+import { json, type LoaderFunction, type ActionFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useActionData, useNavigation, Form } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";

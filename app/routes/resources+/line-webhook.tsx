@@ -4,7 +4,7 @@
  * Receives incoming messages and events from LINE Platform
  */
 
-import { type ActionFunction, json } from "@remix-run/node";
+import { type ActionFunction, json } from "@remix-run/cloudflare";
 import { verifyLineSignature } from "~/utils/line.server";
 
 export const action: ActionFunction = async ({ request }) => {

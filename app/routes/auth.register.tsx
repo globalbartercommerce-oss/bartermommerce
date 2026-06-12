@@ -1,4 +1,4 @@
-import { type ActionFunction, json } from "@remix-run/node";
+import { type ActionFunction, json } from "@remix-run/cloudflare";
 import { Link, Form, useActionData, useNavigation } from "@remix-run/react";
 import { register } from "~/utils/auth.server";
 

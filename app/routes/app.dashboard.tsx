@@ -1,4 +1,4 @@
-import { json, type LoaderFunction } from "@remix-run/node";
+import { json, type LoaderFunction } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";
