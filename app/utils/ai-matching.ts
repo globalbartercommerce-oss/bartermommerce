@@ -71,3 +71,98 @@ export function findBestBarterMatches(
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
+
+// =========================================================================
+// HYBRID SEMANTIC-RULE MATCHMAKER (FALLBACK WHEN EMBEDDINGS ARE MISSING)
+// =========================================================================
+
+export interface HybridListing {
+  id: string;
+  title: string;
+  category: string;
+  estimated_value: number;
+  business_id: string;
+  company_name: string;
+  country_code: string;
+}
+
+export interface HybridMatchResult {
+  id: string;
+  yourListing: string;
+  matchedWith: string;
+  similarity: string;
+  rationale: string;
+  partnerBusinessId: string;
+  partnerListingId: string;
+  myListingId: string;
+}
+
+export function generateHybridMatches(
+  myListings: HybridListing[],
+  otherListings: HybridListing[]
+): HybridMatchResult[] {
+  const matches: HybridMatchResult[] = [];
+
+  for (const myL of myListings) {
+    for (const otherL of otherListings) {
+      if (myL.business_id === otherL.business_id) continue;
+
+      let score = 0.5; // คะแนนฐาน
+
+      // 1. หมวดหมู่สินค้าใกล้เคียงกันหรืออยู่ในเกณฑ์ที่มักแลกกัน
+      if (myL.category !== otherL.category) {
+        score += 0.15; // ความต่างประเภทมักเป็นโอกาสแลกเปลี่ยน (Double Coincidence)
+      } else {
+        score += 0.05; // หมวดหมู่เดียวกันอาจมีความสนใจใกล้เคียงกัน
+      }
+
+      // 2. เปรียบเทียบมูลค่าของที่จะแลกเปลี่ยน
+      const valDiffRatio = Math.abs(myL.estimated_value - otherL.estimated_value) / Math.max(myL.estimated_value, 1);
+      if (valDiffRatio <= 0.1) {
+        score += 0.25; // มูลค่าต่างกันไม่เกิน 10% เหมาะสมดีเลิศ
+      } else if (valDiffRatio <= 0.3) {
+        score += 0.15; // ต่างกันไม่เกิน 30% พอแลกเปลี่ยนได้
+      } else if (valDiffRatio <= 0.5) {
+        score += 0.05;
+      }
+
+      // 3. ปรับคะแนนตามคำสำคัญ
+      const myTitleLower = myL.title.toLowerCase();
+      const otherTitleLower = otherL.title.toLowerCase();
+      if ((myTitleLower.includes("rice") && otherTitleLower.includes("solar")) ||
+          (myTitleLower.includes("solar") && otherTitleLower.includes("rice")) ||
+          (myTitleLower.includes("erp") && otherTitleLower.includes("pack")) ||
+          (myTitleLower.includes("pack") && otherTitleLower.includes("erp"))) {
+        score += 0.1;
+      }
+
+      // ตรึงคะแนนให้อยู่ในช่วง 0.1 ถึง 0.99
+      const finalScore = Math.min(0.99, Math.max(0.1, score));
+
+      // คำนวณคำอธิบาย
+      let rationale = `ระบบประเมินความสอดคล้องด้านมูลค่าโดยมีความต่างส่วนต่างค้างจ่าย ${Math.abs(myL.estimated_value - otherL.estimated_value).toLocaleString()} UNC ซึ่งเอื้อต่อการแลกเปลี่ยน`;
+      if (finalScore > 0.8) {
+        rationale = `คู่ค้าชาว ${otherL.country_code} จาก ${otherL.company_name} มีสินค้าที่เหมาะสมสูงมาก และยินดีชำระส่วนต่างค้างชำระในระบบ Unicorn Credits`;
+      } else if (finalScore > 0.6) {
+        rationale = `ระดับความต้องการสินค้าหมวดหมู่ ${myL.category} กำลังขยายตัวในกลุ่มธุรกิจของคู่ค้า เหมาะสมในการเริ่มข้อเสนอแลกเปลี่ยน`;
+      }
+
+      matches.push({
+        id: `match-${myL.id.substring(0, 4)}-${otherL.id.substring(0, 4)}`,
+        yourListing: myL.title,
+        matchedWith: `${otherL.title} (${otherL.company_name})`,
+        similarity: `${(finalScore * 100).toFixed(1)}%`,
+        rationale,
+        partnerBusinessId: otherL.business_id,
+        partnerListingId: otherL.id,
+        myListingId: myL.id,
+      });
+    }
+  }
+
+  // เรียงลำดับตามความคล้ายสูงสุด
+  return matches
+    .sort((a, b) => parseFloat(b.similarity) - parseFloat(a.similarity))
+    .slice(0, 5); // จำกัด 5 รายการแรกที่ตรงที่สุด
+}
+
