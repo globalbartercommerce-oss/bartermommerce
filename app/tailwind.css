@@ -47,16 +47,14 @@ body {
 
 /* Premium Glassmorphism Overlays */
 .glass-panel {
-  background: rgba(13, 17, 30, 0.75);
-  backdrop-filter: blur(16px);
+  background: rgba(13, 17, 30, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
-  background: rgba(20, 26, 45, 0.45);
-  backdrop-filter: blur(12px);
+  background: rgba(20, 26, 45, 0.80);
   border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {

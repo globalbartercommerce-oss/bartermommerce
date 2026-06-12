@@ -4,7 +4,7 @@ export default function AuthLayout() {
   return (
     <div className="relative min-h-screen bg-background flex flex-col justify-center items-center p-6 overflow-hidden selection:bg-primary selection:text-black">
       {/* Background Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] -z-10 animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] -z-10" />
 
       {/* Header Home Link */}
       <header className="absolute top-8 left-8">
