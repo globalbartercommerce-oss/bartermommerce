@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/cloudflare";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Unicorn Global Commerce — International B2B Barter & Trade Network | ระบบการค้าแลกเปลี่ยนสากล" },
+    { name: "description", content: "เชื่อมโยงธุรกิจไทยและอาเซียนสู่ระบบการค้าแลกเปลี่ยนสากล (Global Barter Economy) แพลตฟอร์มการค้ายุคใหม่แบบไร้เงินสดด้วยระบบจับคู่ AI อัจฉริยะ และระบบค้ำประกัน Escrow ปลอดภัย | Connect Thai & ASEAN businesses to the global cashless barter trade network with AI matching and secure escrow." },
+    { name: "keywords", content: "Unicorn Global Commerce, B2B Barter, Trade Exchange, Cashless Commerce, AI Matching, Escrow Protection, ASEAN Trade Network, แลกเปลี่ยนสินค้า, จับคู่ธุรกิจ" },
+    { property: "og:title", content: "Unicorn Global Commerce — International B2B Barter & Trade Network | ระบบการค้าแลกเปลี่ยนสากล" },
+    { property: "og:description", content: "เชื่อมโยงธุรกิจไทยและอาเซียนสู่ระบบการค้าแลกเปลี่ยนสากล แพลตฟอร์มการค้ายุคใหม่แบบไร้เงินสดด้วย AI matching และระบบค้ำประกัน Escrow" },
+    { property: "og:image", content: "/favicon.png" },
+    { property: "og:type", content: "website" },
+  ];
+};
 
 // Premium SVG Icon Components
 const RefreshCwIcon = ({ className = "w-6 h-6" }: { className?: string }) => (

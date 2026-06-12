@@ -11,6 +11,7 @@ import DefaultErrorBoundary from '~/components/ui/error-boundary'
 import iconsHref from '~/components/ui/icons/sprite.svg?url'
 
 export const links: LinksFunction = () => [
+  { rel: 'icon', type: 'image/png', href: '/favicon.png' },
   { rel: 'prefetch', href: iconsHref, as: 'image' },
 ]
 
