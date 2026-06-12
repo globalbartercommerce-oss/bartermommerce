@@ -152,6 +152,22 @@ export const action: ActionFunction = async ({ request }) => {
 
       if (logError) throw logError;
 
+      // Record settlement
+      const gatewayTxId = `ch_${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+      const { error: settlementError } = await supabaseAdmin
+        .from("settlements")
+        .insert({
+          business_id: business.id,
+          payment_gateway: "stripe",
+          gateway_transaction_id: gatewayTxId,
+          amount: amount,
+          currency: "USD",
+          direction: "inbound",
+          status: "completed",
+        });
+
+      if (settlementError) throw settlementError;
+
       return json({ success: true, message: `ทำการฝากเงินจำนวน ${amount.toLocaleString()} UNC สำเร็จ!` });
 
     } else {
@@ -185,6 +201,22 @@ export const action: ActionFunction = async ({ request }) => {
         });
 
       if (logError) throw logError;
+
+      // Record settlement
+      const gatewayTxId = `tr_${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+      const { error: settlementError } = await supabaseAdmin
+        .from("settlements")
+        .insert({
+          business_id: business.id,
+          payment_gateway: "wise",
+          gateway_transaction_id: gatewayTxId,
+          amount: amount,
+          currency: "USD",
+          direction: "outbound",
+          status: "pending",
+        });
+
+      if (settlementError) throw settlementError;
 
       return json({ success: true, message: `ทำการถอนเงินจำนวน ${amount.toLocaleString()} UNC สำเร็จ!` });
     }

@@ -62,7 +62,9 @@ export default function AppLayout() {
     { label: "Merchant Directory", path: "/app/directory", icon: "🏢" },
     { label: "My Wallet", path: "/app/wallet", icon: "💳" },
     { label: "Barter Contracts", path: "/app/barter", icon: "💱" },
+    { label: "Escrows & Settlements", path: "/app/escrows", icon: "🛡️" },
   ];
+
 
   return (
     <div className="min-h-screen bg-[#070a13] text-white flex flex-col md:flex-row selection:bg-primary selection:text-black">
