@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@remix-run/react";
 
 const CONTENT = {
@@ -234,10 +234,20 @@ export default function Index() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Restore saved language after hydration (avoids SSR mismatch)
+  useEffect(() => {
+    const saved = localStorage.getItem("lang");
+    if (saved === "en" || saved === "th") {
+      setLang(saved);
+    }
+  }, []);
+
   const t = CONTENT[lang];
 
   const handleLangToggle = () => {
-    setLang((prev) => (prev === "th" ? "en" : "th"));
+    const next = lang === "th" ? "en" : "th";
+    setLang(next);
+    localStorage.setItem("lang", next);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
