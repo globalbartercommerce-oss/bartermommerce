@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     morganPlugin(),
     remixDevTools(),
-    tsconfigPaths(),
+    tsconfigPaths({ ignoreConfigErrors: true }),
     remix({
       ignoredRouteFiles: ['**/*'],
       serverModuleFormat: 'esm',

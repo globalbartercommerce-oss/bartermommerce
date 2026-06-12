@@ -1,12 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL || "";
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-
-if (!supabaseUrl) {
-  console.error("[Supabase] SUPABASE_URL is not configured.");
-}
+// Use placeholder so the Worker boots even when env vars are not yet configured.
+// Actual API calls will fail gracefully when the real values are missing.
+const supabaseUrl = process.env.SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "placeholder-anon-key";
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "placeholder-service-role-key";
 
 // Service Role client for bypassing RLS in admin actions and triggers
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
