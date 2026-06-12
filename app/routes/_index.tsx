@@ -1,6 +1,147 @@
 import { useState, useEffect } from "react";
 import { Link } from "@remix-run/react";
 
+// Premium SVG Icon Components
+const RefreshCwIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M3 21v-5h5" />
+  </svg>
+);
+
+const CpuIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="16" height="16" x="4" y="4" rx="2" />
+    <rect width="6" height="6" x="9" y="9" rx="1" />
+    <path d="M9 1v3" />
+    <path d="M15 1v3" />
+    <path d="M9 20v3" />
+    <path d="M15 20v3" />
+    <path d="M20 9h3" />
+    <path d="M20 15h3" />
+    <path d="M1 9h3" />
+    <path d="M1 15h3" />
+  </svg>
+);
+
+const ShieldCheckIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6v7z" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+);
+
+const GlobeIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+    <path d="M2 12h20" />
+  </svg>
+);
+
+const HeartPulseIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <path d="M3.22 12H9.5l1.5-4.5 2 9 1.5-4.5h3.27" />
+  </svg>
+);
+
+const HandshakeIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-1.4-1.4a1 1 0 0 0-1.4 0L13 14" />
+    <path d="m13 14 3-3M2 13a6 6 0 0 1 11.2-3M20 13a6 6 0 0 0-11.2-3" />
+    <path d="m13 10-3-3a1 1 0 0 0-1.4 0L4.4 8.2a1 1 0 0 0 0 1.4L7 12l2.3-2.3a1 1 0 0 1 1.4 0L13 12" />
+  </svg>
+);
+
+const CompassIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+  </svg>
+);
+
+const BuildingIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+    <path d="M9 22v-4h6v4" />
+    <path d="M8 6h.01" />
+    <path d="M16 6h.01" />
+    <path d="M8 10h.01" />
+    <path d="M16 10h.01" />
+    <path d="M8 14h.01" />
+    <path d="M16 14h.01" />
+  </svg>
+);
+
+const UtensilsIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+    <path d="M7 2v20" />
+    <path d="M21 15V2v0a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Z" />
+    <path d="M18 22V15" />
+  </svg>
+);
+
+const SparklesIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+    <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5z" />
+    <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" />
+  </svg>
+);
+
+const GraduationCapIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+    <path d="M21.5 12v6" />
+  </svg>
+);
+
+const LaptopIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="12" x="3" y="4" rx="2" ry="2" />
+    <line x1="2" x2="22" y1="20" y2="20" />
+    <line x1="5" x2="19" y1="16" y2="16" />
+  </svg>
+);
+
+const MailIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const MapPinIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const LinkIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+// Map of industry icons
+const industryIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  health: HeartPulseIcon,
+  service: HandshakeIcon,
+  hospitality: CompassIcon,
+  realestate: BuildingIcon,
+  food: UtensilsIcon,
+  beauty: SparklesIcon,
+  education: GraduationCapIcon,
+  digital: LaptopIcon,
+};
+
 const CONTENT = {
   th: {
     nav: {
@@ -62,14 +203,14 @@ const CONTENT = {
       title: "กลุ่มธุรกิจที่เราเชื่อมโยง",
       subtitle: "INDUSTRIES WE CONNECT",
       list: [
-        { name: "สุขภาพและเวลเนส", icon: "🏥", en: "Health & Wellness" },
-        { name: "ธุรกิจบริการ", icon: "🤝", en: "Service Industries" },
-        { name: "โรงแรมและท่องเที่ยว", icon: "🏨", en: "Hospitality & Tourism" },
-        { name: "อสังหาริมทรัพย์", icon: "🏢", en: "Real Estate" },
-        { name: "ธุรกิจอาหารและเครื่องดื่ม", icon: "🍔", en: "Food & Beverage" },
-        { name: "ธุรกิจความงามและไลฟ์สไตล์", icon: "💄", en: "Beauty & Lifestyle" },
-        { name: "ธุรกิจการศึกษา", icon: "🎓", en: "Education" },
-        { name: "ธุรกิจดิจิทัลและออนไลน์", icon: "💻", en: "Digital & Online Business" },
+        { name: "สุขภาพและเวลเนส", icon: "health", en: "Health & Wellness" },
+        { name: "ธุรกิจบริการ", icon: "service", en: "Service Industries" },
+        { name: "โรงแรมและท่องเที่ยว", icon: "hospitality", en: "Hospitality & Tourism" },
+        { name: "อสังหาริมทรัพย์", icon: "realestate", en: "Real Estate" },
+        { name: "ธุรกิจอาหารและเครื่องดื่ม", icon: "food", en: "Food & Beverage" },
+        { name: "ธุรกิจความงามและไลฟ์สไตล์", icon: "beauty", en: "Beauty & Lifestyle" },
+        { name: "ธุรกิจการศึกษา", icon: "education", en: "Education" },
+        { name: "ธุรกิจดิจิทัลและออนไลน์", icon: "digital", en: "Digital & Online Business" },
       ]
     },
     statement: {
@@ -171,14 +312,14 @@ const CONTENT = {
       title: "Industries We Connect",
       subtitle: "INDUSTRIES WE CONNECT",
       list: [
-        { name: "Health & Wellness", icon: "🏥", en: "Health & Wellness" },
-        { name: "Service Industries", icon: "🤝", en: "Service Industries" },
-        { name: "Hospitality & Tourism", icon: "🏨", en: "Hospitality & Tourism" },
-        { name: "Real Estate", icon: "🏢", en: "Real Estate" },
-        { name: "Food & Beverage", icon: "🍔", en: "Food & Beverage" },
-        { name: "Beauty & Lifestyle", icon: "💄", en: "Beauty & Lifestyle" },
-        { name: "Education", icon: "🎓", en: "Education" },
-        { name: "Digital & Online Business", icon: "💻", en: "Digital & Online Business" },
+        { name: "Health & Wellness", icon: "health", en: "Health & Wellness" },
+        { name: "Service Industries", icon: "service", en: "Service Industries" },
+        { name: "Hospitality & Tourism", icon: "hospitality", en: "Hospitality & Tourism" },
+        { name: "Real Estate", icon: "realestate", en: "Real Estate" },
+        { name: "Food & Beverage", icon: "food", en: "Food & Beverage" },
+        { name: "Beauty & Lifestyle", icon: "beauty", en: "Beauty & Lifestyle" },
+        { name: "Education", icon: "education", en: "Education" },
+        { name: "Digital & Online Business", icon: "digital", en: "Digital & Online Business" },
       ]
     },
     statement: {
@@ -293,11 +434,13 @@ export default function Index() {
         <div className="flex items-center gap-4">
           {/* Language Selector */}
           <button
+            type="button"
             onClick={handleLangToggle}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 hover:border-primary/50 bg-white/5 text-xs font-bold text-white transition-all duration-200"
             aria-label="Toggle Language"
           >
-            🌐 <span className="text-primary">{lang === "th" ? "EN" : "TH"}</span>
+            <GlobeIcon className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-primary">{lang === "th" ? "EN" : "TH"}</span>
           </button>
 
           <Link to="/auth/login" className="text-sm font-semibold text-white hover:text-primary transition">
@@ -337,8 +480,8 @@ export default function Index() {
           {/* Interactive Feature Cards Panel */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="glass-card p-6 rounded-3xl space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-xl font-bold">
-                💱
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shadow-primary/20">
+                <RefreshCwIcon className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-white text-lg">{lang === "th" ? "การค้าไร้เงินตรา" : "B2B Barter Commerce"}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -348,8 +491,8 @@ export default function Index() {
               </p>
             </div>
             <div className="glass-card p-6 rounded-3xl space-y-4 lg:translate-y-6">
-              <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary text-xl font-bold">
-                🤖
+              <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner shadow-secondary/20">
+                <CpuIcon className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-white text-lg">{lang === "th" ? "ระบบจับคู่ AI อัจฉริยะ" : "AI Smart Matchmaking"}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -359,8 +502,8 @@ export default function Index() {
               </p>
             </div>
             <div className="glass-card p-6 rounded-3xl space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl font-bold">
-                🔒
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 shadow-inner shadow-blue-500/20">
+                <ShieldCheckIcon className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-white text-lg">{lang === "th" ? "ระบบค้ำประกัน Escrow" : "Secure Escrow Protection"}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -370,8 +513,8 @@ export default function Index() {
               </p>
             </div>
             <div className="glass-card p-6 rounded-3xl space-y-4 lg:translate-y-6">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xl font-bold">
-                🌍
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 shadow-inner shadow-amber-500/20">
+                <GlobeIcon className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-white text-lg">{lang === "th" ? "เชื่อมโยงสมาคมการค้า" : "Global Trade Affiliations"}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -544,15 +687,20 @@ export default function Index() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
-            {t.industries.list.map((ind, idx) => (
-              <div key={idx} className="glass-card p-6 rounded-2xl text-center flex flex-col items-center justify-center space-y-3 hover:translate-y-[-4px]">
-                <div className="text-3xl">{ind.icon}</div>
-                <div className="space-y-0.5">
-                  <h3 className="font-bold text-white text-sm sm:text-base">{lang === "th" ? ind.name : ind.en}</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{lang === "th" ? ind.en : ""}</p>
+            {t.industries.list.map((ind, idx) => {
+              const IndustryIcon = industryIconMap[ind.icon] || SparklesIcon;
+              return (
+                <div key={idx} className="glass-card p-6 rounded-2xl text-center flex flex-col items-center justify-center space-y-3 hover:translate-y-[-4px]">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner shadow-secondary/20">
+                    <IndustryIcon className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h3 className="font-bold text-white text-sm sm:text-base">{lang === "th" ? ind.name : ind.en}</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{lang === "th" ? ind.en : ""}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -719,11 +867,27 @@ export default function Index() {
 
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">{lang === "th" ? "ข้อมูลการติดต่อ" : "Corporate Office"}</h4>
-            <div className="text-xs text-muted-foreground space-y-2 leading-relaxed">
-              <p>🇺🇸 **Unicorn Global Commerce LLC** (USA)</p>
-              <p>🇹🇭 **Unicorn Global Link** (Thailand)</p>
-              <p>🌐 [unicorngloballink.com](https://unicorngloballink.com)</p>
-              <p>📧 contract.global@gmail.com</p>
+            <div className="text-xs text-muted-foreground space-y-2.5 leading-relaxed">
+              <div className="flex items-start gap-2.5">
+                <MapPinIcon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-white font-semibold">Unicorn Global Commerce LLC</span> (USA)
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <MapPinIcon className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-white font-semibold">Unicorn Global Link</span> (Thailand)
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                <a href="https://unicorngloballink.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">unicorngloballink.com</a>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <MailIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                <a href="mailto:contract.global@gmail.com" className="hover:text-primary transition">contract.global@gmail.com</a>
+              </div>
             </div>
           </div>
         </div>
