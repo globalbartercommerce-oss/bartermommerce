@@ -1,40 +1,29 @@
-import { json } from '@remix-run/cloudflare'
+import { createCookieSessionStorage, redirect } from "@remix-run/cloudflare";
+import { getSupabaseClient, supabaseAdmin } from "./supabase.server";
+import { sendWelcomeEmail } from "./resend.server";
+import { notifyAdminNewBusiness } from "./line.server";
 
-export function notFound(message?: string) {
-  return new Response(message ?? 'Not Found', {
-    status: 404,
-    statusText: 'Not Found',
-  })
+// Configure encrypted session cookie storage
+const sessionSecret = process.env.SESSION_SECRET || "default-secret-key-at-least-32-chars-long";
+
+const storage = createCookieSessionStorage({
+  cookie: {
+    name: "unicorn_session",
+    secure: process.env.NODE_ENV === "production",
+    secrets: [sessionSecret],
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true,
+  },
+});
+
+export async function getSession(request: Request) {
+  const cookie = request.headers.get("Cookie");
+  return storage.getSession(cookie);
 }
 
-export function invalid(message?: string) {
-  return new Response(message ?? 'Method Not Allowed', {
-    status: 405,
-    statusText: 'Method Not Allowed',
-  })
-}
-
-export function badRequest(message: string, errors: string[]) {
-  return json(
-    { message: message, errors },
-    { status: 400, statusText: 'Bad Request' },
-  )
-}
-
-export function notLoggedIn(message?: string) {
-  return new Response(message ?? 'Not Logged In', {
-    status: 401,
-    statusText: 'Not Logged In',
-  })
-}
-
-export function forbidden(message?: string) {
-  return new Response(message ?? 'Unauthorized', {
-    status: 403,
-    statusText: 'Forbidden',
-  })
-}
-m current session
+// Get user ID from current session
 export async function getUserId(request: Request): Promise<string | null> {
   const session = await getSession(request);
   const userId = session.get("userId");
