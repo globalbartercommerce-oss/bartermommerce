@@ -35,16 +35,20 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_activity_logs ENABLE ROW LEVEL SECURITY;
 
 -- Profiles Policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles
     FOR UPDATE USING (auth.uid() = id);
 
 -- User Activity Logs Policies
+DROP POLICY IF EXISTS "Users can view their own activity logs" ON public.user_activity_logs;
 CREATE POLICY "Users can view their own activity logs" ON public.user_activity_logs
     FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "System can insert activity logs" ON public.user_activity_logs;
 CREATE POLICY "System can insert activity logs" ON public.user_activity_logs
     FOR INSERT WITH CHECK (true);
 
@@ -86,21 +90,26 @@ ALTER TABLE public.businesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.business_verification_documents ENABLE ROW LEVEL SECURITY;
 
 -- Businesses Policies
+DROP POLICY IF EXISTS "Businesses are viewable by everyone" ON public.businesses;
 CREATE POLICY "Businesses are viewable by everyone" ON public.businesses
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Owners can insert their own business" ON public.businesses;
 CREATE POLICY "Owners can insert their own business" ON public.businesses
     FOR INSERT WITH CHECK (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Owners can update their own business" ON public.businesses;
 CREATE POLICY "Owners can update their own business" ON public.businesses
     FOR UPDATE USING (auth.uid() = owner_id);
 
 -- Business Verification Documents Policies
+DROP POLICY IF EXISTS "Owners can view their own documents" ON public.business_verification_documents;
 CREATE POLICY "Owners can view their own documents" ON public.business_verification_documents
     FOR SELECT USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
     );
 
+DROP POLICY IF EXISTS "Owners can upload their own documents" ON public.business_verification_documents;
 CREATE POLICY "Owners can upload their own documents" ON public.business_verification_documents
     FOR INSERT WITH CHECK (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
@@ -141,15 +150,18 @@ ALTER TABLE public.membership_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Membership Plans Policies
+DROP POLICY IF EXISTS "Plans are viewable by everyone" ON public.membership_plans;
 CREATE POLICY "Plans are viewable by everyone" ON public.membership_plans
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Only Admin can manage plans" ON public.membership_plans;
 CREATE POLICY "Only Admin can manage plans" ON public.membership_plans
     USING (
         auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'admin')
     );
 
 -- Subscriptions Policies
+DROP POLICY IF EXISTS "Owners can view their own subscriptions" ON public.subscriptions;
 CREATE POLICY "Owners can view their own subscriptions" ON public.subscriptions
     FOR SELECT USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
@@ -194,17 +206,21 @@ ALTER TABLE public.trade_associations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.business_association_members ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Categories
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON public.directory_categories;
 CREATE POLICY "Categories are viewable by everyone" ON public.directory_categories
     FOR SELECT USING (true);
 
 -- Policies for Trade Associations
+DROP POLICY IF EXISTS "Associations are viewable by everyone" ON public.trade_associations;
 CREATE POLICY "Associations are viewable by everyone" ON public.trade_associations
     FOR SELECT USING (true);
 
 -- Policies for Association Members
+DROP POLICY IF EXISTS "Association members are viewable by everyone" ON public.business_association_members;
 CREATE POLICY "Association members are viewable by everyone" ON public.business_association_members
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Owners can manage their association membership" ON public.business_association_members;
 CREATE POLICY "Owners can manage their association membership" ON public.business_association_members
     USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
@@ -250,18 +266,22 @@ ALTER TABLE public.listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.business_directory_listings ENABLE ROW LEVEL SECURITY;
 
 -- Listings Policies
+DROP POLICY IF EXISTS "Listings are viewable by everyone" ON public.listings;
 CREATE POLICY "Listings are viewable by everyone" ON public.listings
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Owners can manage their own listings" ON public.listings;
 CREATE POLICY "Owners can manage their own listings" ON public.listings
     USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
     );
 
 -- Listings Directory Policies
+DROP POLICY IF EXISTS "Listings directory is viewable by everyone" ON public.business_directory_listings;
 CREATE POLICY "Listings directory is viewable by everyone" ON public.business_directory_listings
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Owners can manage their listings directory entry" ON public.business_directory_listings;
 CREATE POLICY "Owners can manage their listings directory entry" ON public.business_directory_listings
     USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
@@ -301,12 +321,14 @@ ALTER TABLE public.wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ledger_transactions ENABLE ROW LEVEL SECURITY;
 
 -- Wallets Policies
+DROP POLICY IF EXISTS "Owners can view their own wallet" ON public.wallets;
 CREATE POLICY "Owners can view their own wallet" ON public.wallets
     FOR SELECT USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
     );
 
 -- Ledger Transactions Policies
+DROP POLICY IF EXISTS "Owners can view their own ledger logs" ON public.ledger_transactions;
 CREATE POLICY "Owners can view their own ledger logs" ON public.ledger_transactions
     FOR SELECT USING (
         auth.uid() IN (
@@ -347,6 +369,7 @@ ALTER TABLE public.barter_offers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.barter_offer_items ENABLE ROW LEVEL SECURITY;
 
 -- Barter Offers Policies
+DROP POLICY IF EXISTS "Owners involved in the barter can view their offers" ON public.barter_offers;
 CREATE POLICY "Owners involved in the barter can view their offers" ON public.barter_offers
     FOR SELECT USING (
         auth.uid() IN (
@@ -354,11 +377,13 @@ CREATE POLICY "Owners involved in the barter can view their offers" ON public.ba
         )
     );
 
+DROP POLICY IF EXISTS "Sender can initiate barter offer" ON public.barter_offers;
 CREATE POLICY "Sender can initiate barter offer" ON public.barter_offers
     FOR INSERT WITH CHECK (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = sender_business_id)
     );
 
+DROP POLICY IF EXISTS "Parties involved can update the barter status" ON public.barter_offers;
 CREATE POLICY "Parties involved can update the barter status" ON public.barter_offers
     FOR UPDATE USING (
         auth.uid() IN (
@@ -367,6 +392,7 @@ CREATE POLICY "Parties involved can update the barter status" ON public.barter_o
     );
 
 -- Barter Offer Items Policies
+DROP POLICY IF EXISTS "Parties involved can view offer items" ON public.barter_offer_items;
 CREATE POLICY "Parties involved can view offer items" ON public.barter_offer_items
     FOR SELECT USING (
         auth.uid() IN (
@@ -400,6 +426,7 @@ CREATE TABLE IF NOT EXISTS public.escrows (
 ALTER TABLE public.escrows ENABLE ROW LEVEL SECURITY;
 
 -- Escrows Policies
+DROP POLICY IF EXISTS "Parties involved can view escrow status" ON public.escrows;
 CREATE POLICY "Parties involved can view escrow status" ON public.escrows
     FOR SELECT USING (
         auth.uid() IN (
@@ -431,6 +458,7 @@ CREATE TABLE IF NOT EXISTS public.settlements (
 ALTER TABLE public.settlements ENABLE ROW LEVEL SECURITY;
 
 -- Settlements Policies
+DROP POLICY IF EXISTS "Owners can view their own settlements" ON public.settlements;
 CREATE POLICY "Owners can view their own settlements" ON public.settlements
     FOR SELECT USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
@@ -475,19 +503,23 @@ ALTER TABLE public.community_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_programs ENABLE ROW LEVEL SECURITY;
 
 -- Communities Policies
+DROP POLICY IF EXISTS "Communities are viewable by everyone" ON public.communities;
 CREATE POLICY "Communities are viewable by everyone" ON public.communities
     FOR SELECT USING (true);
 
 -- Community Members Policies
+DROP POLICY IF EXISTS "Members list is viewable by everyone" ON public.community_members;
 CREATE POLICY "Members list is viewable by everyone" ON public.community_members
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Owners can manage their membership" ON public.community_members;
 CREATE POLICY "Owners can manage their membership" ON public.community_members
     USING (
         auth.uid() IN (SELECT owner_id FROM public.businesses WHERE id = business_id)
     );
 
 -- Referral Policies
+DROP POLICY IF EXISTS "Referral log viewable by parties involved" ON public.referral_programs;
 CREATE POLICY "Referral log viewable by parties involved" ON public.referral_programs
     FOR SELECT USING (
         auth.uid() IN (
@@ -515,6 +547,7 @@ CREATE TABLE IF NOT EXISTS public.ai_matches (
 ALTER TABLE public.ai_matches ENABLE ROW LEVEL SECURITY;
 
 -- AI Matches Policies
+DROP POLICY IF EXISTS "AI matches are viewable by listing owners" ON public.ai_matches;
 CREATE POLICY "AI matches are viewable by listing owners" ON public.ai_matches
     FOR SELECT USING (
         auth.uid() IN (
@@ -545,6 +578,7 @@ CREATE TABLE IF NOT EXISTS public.admin_disputes (
 ALTER TABLE public.admin_disputes ENABLE ROW LEVEL SECURITY;
 
 -- Admin Disputes Policies
+DROP POLICY IF EXISTS "Disputes viewable by parties involved or assigned admin" ON public.admin_disputes;
 CREATE POLICY "Disputes viewable by parties involved or assigned admin" ON public.admin_disputes
     FOR SELECT USING (
         auth.uid() = assigned_admin_id
@@ -585,7 +619,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger execution for auth
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
@@ -601,6 +636,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger execution for wallet
-CREATE OR REPLACE TRIGGER on_business_registered_create_wallet
+DROP TRIGGER IF EXISTS on_business_registered_create_wallet ON public.businesses;
+CREATE TRIGGER on_business_registered_create_wallet
     AFTER INSERT ON public.businesses
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_business_wallet();
