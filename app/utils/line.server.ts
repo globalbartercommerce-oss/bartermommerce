@@ -4,6 +4,8 @@
  * Uses LINE Messaging API (Official Bot Channel)
  */
 
+import crypto from "node:crypto";
+
 // ── Types ──────────────────────────────────────────────────
 interface LineTextMessage {
   type: "text";
@@ -322,7 +324,6 @@ export function verifyLineSignature(
   body: string,
   signature: string
 ): boolean {
-  const crypto = require("crypto");
   const secret = process.env.LINE_CHANNEL_SECRET;
   if (!secret) return false;
 

@@ -1,4 +1,4 @@
-import { json } from '@remix-run/node'
+import { json } from '@remix-run/cloudflare'
 
 export function notFound(message?: string) {
   return new Response(message ?? 'Not Found', {
