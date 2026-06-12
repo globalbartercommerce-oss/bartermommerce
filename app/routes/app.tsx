@@ -1,5 +1,5 @@
 import { json, redirect, type LoaderFunction } from "@remix-run/node";
-import { Outlet, Link, useLocation } from "@remix-run/react";
+import { Outlet, Link, useLocation, useLoaderData } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";
 
@@ -9,13 +9,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   // If already on the onboarding page, do not guard redirect to prevent infinite loops
   if (url.pathname === "/app/onboarding") {
-    return json({ user: { id: userId }, business: null });
+    return json({ user: { id: userId }, business: null, wallet: null });
   }
 
   // Fetch business profile to check onboarding completion
   const { data: business, error } = await supabaseAdmin
     .from("businesses")
-    .select("phone, verification_status")
+    .select("id, company_name, phone, verification_status")
     .eq("owner_id", userId)
     .single();
 
@@ -24,11 +24,37 @@ export const loader: LoaderFunction = async ({ request }) => {
     return redirect("/app/onboarding");
   }
 
-  return json({ user: { id: userId }, business });
+  // Fetch or create wallet
+  let { data: wallet } = await supabaseAdmin
+    .from("wallets")
+    .select("balance, hold_balance")
+    .eq("business_id", business.id)
+    .single();
+
+  if (!wallet) {
+    const { data: newWallet, error: walletError } = await supabaseAdmin
+      .from("wallets")
+      .insert({ business_id: business.id, balance: 0.00, hold_balance: 0.00, currency: "UNC" })
+      .select("balance, hold_balance")
+      .single();
+    if (!walletError && newWallet) {
+      wallet = newWallet;
+    }
+  }
+
+  return json({ 
+    user: { id: userId }, 
+    business, 
+    wallet: wallet || { balance: 0.00, hold_balance: 0.00 } 
+  });
 };
 
 export default function AppLayout() {
   const location = useLocation();
+  const { business, wallet } = useLoaderData<{
+    business: { company_name: string; verification_status: string } | null;
+    wallet: { balance: number; hold_balance: number } | null;
+  }>();
   
   const navItems = [
     { label: "Dashboard", path: "/app/dashboard", icon: "📊" },
@@ -74,13 +100,13 @@ export default function AppLayout() {
         {/* Upgrade / Account box */}
         <div className="glass-card p-4 rounded-2xl space-y-3">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
-              GOLD MEMBER
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full uppercase border border-primary/20">
+              {business?.verification_status || "PENDING"} Member
             </span>
           </div>
           <div className="space-y-0.5">
             <h4 className="text-xs text-muted-foreground font-semibold">Verified KYB</h4>
-            <p className="text-xs text-white truncate font-bold">Unicorn Global Link</p>
+            <p className="text-xs text-white truncate font-bold">{business?.company_name || "Unicorn Global Link"}</p>
           </div>
         </div>
       </aside>
@@ -103,19 +129,21 @@ export default function AppLayout() {
 
           <div className="flex items-center gap-6">
             {/* Wallet Quick Balance */}
-            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 py-1.5 px-3.5 rounded-2xl">
-              <span className="text-xs font-semibold text-emerald-400">Balance:</span>
-              <span className="font-extrabold text-sm text-emerald-300 tracking-wider">
-                12,500.00 UNC
-              </span>
-            </div>
+            {wallet && (
+              <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 py-1.5 px-3.5 rounded-2xl">
+                <span className="text-xs font-semibold text-emerald-400">Balance:</span>
+                <span className="font-extrabold text-sm text-emerald-300 tracking-wider">
+                  {Number(wallet.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} UNC
+                </span>
+              </div>
+            )}
 
             {/* User Profile avatar */}
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-secondary/20 border border-secondary/35 flex items-center justify-center font-bold text-white text-xs">
-                UGL
+                {(business?.company_name || "U").substring(0, 3).toUpperCase()}
               </div>
-              <span className="hidden lg:block text-xs font-bold text-white">Unicorn Thailand</span>
+              <span className="hidden lg:block text-xs font-bold text-white">{business?.company_name || "Unicorn Thailand"}</span>
             </div>
           </div>
         </header>
