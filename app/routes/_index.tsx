@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "@remix-run/react";
-import type { MetaFunction } from "@remix-run/cloudflare";
+import type { MetaFunction, HeadersFunction } from "@remix-run/cloudflare";
+
+export const headers: HeadersFunction = () => {
+  return {
+    "Cache-Control": "public, max-age=3600, s-maxage=86400",
+  };
+};
 
 export const meta: MetaFunction = () => {
   return [

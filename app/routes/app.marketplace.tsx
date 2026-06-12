@@ -332,7 +332,13 @@ export default function Marketplace() {
             <div key={item.id} className="glass-card p-6 rounded-2xl flex gap-6 items-start">
               <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden">
                 {item.images?.[0]?.startsWith("http") ? (
-                  <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                  <img
+                    src={item.images[0]}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   item.images?.[0] || "📦"
                 )}
