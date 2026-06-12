@@ -1,6 +1,10 @@
 import * as fs from 'node:fs'
 import { createRequestHandler } from '@remix-run/express'
 import { installGlobals } from '@remix-run/node'
+import dotenv from 'dotenv'
+
+// Load environment variables from .env
+dotenv.config()
 import chalk from 'chalk'
 import express from 'express'
 import morgan from 'morgan'

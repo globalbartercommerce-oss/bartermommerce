@@ -377,9 +377,13 @@ export default function Index() {
 
   // Restore saved language after hydration (avoids SSR mismatch)
   useEffect(() => {
-    const saved = localStorage.getItem("lang");
-    if (saved === "en" || saved === "th") {
-      setLang(saved);
+    try {
+      const saved = localStorage.getItem("lang");
+      if (saved === "en" || saved === "th") {
+        setLang(saved);
+      }
+    } catch (e) {
+      console.warn("localStorage is not accessible:", e);
     }
   }, []);
 
@@ -388,7 +392,11 @@ export default function Index() {
   const handleLangToggle = () => {
     const next = lang === "th" ? "en" : "th";
     setLang(next);
-    localStorage.setItem("lang", next);
+    try {
+      localStorage.setItem("lang", next);
+    } catch (e) {
+      console.warn("localStorage is not accessible:", e);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
