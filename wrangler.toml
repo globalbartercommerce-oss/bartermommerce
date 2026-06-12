@@ -1,0 +1,17 @@
+name = "bartermommerce"
+compatibility_date = "2024-06-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "build/client"
+
+# ── Environment Variables (Production) ─────────────────────
+# Set via: Cloudflare Dashboard → Pages → Settings → Environment variables
+# Or: wrangler pages secret put <VAR_NAME>
+# [vars] block is for non-secret values only
+
+[vars]
+APP_ENV = "production"
+
+# ── R2 Bucket Binding (for Pages Functions) ────────────────
+[[r2_buckets]]
+binding = "BARTER_MEDIA"
+bucket_name = "barter-media"

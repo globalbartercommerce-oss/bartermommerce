@@ -32,6 +32,7 @@ export interface Env {
   LINE_ADMIN_USER_ID: string;
   // Config
   APP_ENV: string;
+  R2_PUBLIC_URL: string;
 }
 
 // ── App Setup ─────────────────────────────────────────────
@@ -107,8 +108,8 @@ app.post("/api/upload", requireSecret, async (c) => {
     },
   });
 
-  // Construct public URL from R2 custom domain if available
-  const publicUrl = `https://pub-placeholder.r2.dev/${key}`;
+  // Construct public URL from R2 custom domain
+  const publicUrl = `${c.env.R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
 
   return c.json({ url: publicUrl, key, size: file.size });
 });

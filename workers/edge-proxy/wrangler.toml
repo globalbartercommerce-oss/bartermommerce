@@ -12,6 +12,7 @@ bucket_name = "barter-media"
 # ── Environment Variables ───────────────────────────────────
 [vars]
 APP_ENV = "production"
+R2_PUBLIC_URL = "https://pub-bd7c0a4188d8418e8b44d20f4d6d8ed8.r2.dev"
 
 # ── Staging Environment ─────────────────────────────────────
 [env.staging]
