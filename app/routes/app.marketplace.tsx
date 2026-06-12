@@ -1,9 +1,16 @@
-import { useState, useEffect, useRef } from "react";
-import { json, type LoaderFunction, type ActionFunction } from "@remix-run/node";
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  json,
+  unstable_parseMultipartFormData,
+  unstable_createMemoryUploadHandler,
+  type LoaderFunction,
+  type ActionFunction,
+} from "@remix-run/node";
 import { useLoaderData, useActionData, useSubmit, useNavigation, Form } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";
 import { listingSchema } from "../../src/features/marketplace/validation";
+import { uploadToR2, isR2Configured } from "~/utils/r2.server";
 
 interface CategoryName {
   th: string;
@@ -123,8 +130,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const userId = await requireUserId(request);
-  const formData = await request.formData();
-  
+
+  // Parse multipart form data (supports file uploads)
+  const uploadHandler = unstable_createMemoryUploadHandler({
+    maxPartSize: 10 * 1024 * 1024, // 10MB
+  });
+  const formData = await unstable_parseMultipartFormData(request, uploadHandler);
+
   const rawData = {
     title: formData.get("title"),
     description: formData.get("description"),
@@ -138,9 +150,9 @@ export const action: ActionFunction = async ({ request }) => {
   // Validate payload
   const result = listingSchema.safeParse(rawData);
   if (!result.success) {
-    return json({ 
-      success: false, 
-      errors: result.error.flatten().fieldErrors 
+    return json({
+      success: false,
+      errors: result.error.flatten().fieldErrors,
     }, { status: 400 });
   }
 
@@ -158,16 +170,28 @@ export const action: ActionFunction = async ({ request }) => {
       throw new Error("ไม่พบข้อมูลร้านค้าของคุณ กรุณาทำ Onboarding ก่อน");
     }
 
-    // 2. Select appropriate image emoji/placeholder
-    let imageEmoji = "📦";
-    if (data.type === "service") {
-      imageEmoji = "💼";
-    } else if (data.title.includes("ข้าว") || data.title.toLowerCase().includes("rice")) {
-      imageEmoji = "🌾";
-    } else if (data.title.includes("ไฟ") || data.title.toLowerCase().includes("energy") || data.title.toLowerCase().includes("solar")) {
-      imageEmoji = "🔋";
-    } else if (data.title.includes("คอม") || data.title.toLowerCase().includes("ai") || data.title.toLowerCase().includes("software")) {
-      imageEmoji = "💻";
+    // 2. Upload images to Cloudflare R2
+    const imageUrls: string[] = [];
+    const imageFiles = formData.getAll("images") as File[];
+    const validImages = imageFiles.filter((f) => f instanceof File && f.size > 0);
+
+    if (validImages.length > 0 && isR2Configured()) {
+      for (const file of validImages.slice(0, 5)) {
+        if (!file.type.startsWith("image/")) continue;
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const result = await uploadToR2(buffer, file.name, "listings");
+        imageUrls.push(result.url);
+      }
+    }
+
+    // Fallback: use emoji placeholder if no images uploaded or R2 not configured
+    if (imageUrls.length === 0) {
+      let imageEmoji = "📦";
+      if (data.type === "service") imageEmoji = "💼";
+      else if (data.title.includes("ข้าว") || data.title.toLowerCase().includes("rice")) imageEmoji = "🌾";
+      else if (data.title.toLowerCase().includes("energy") || data.title.toLowerCase().includes("solar")) imageEmoji = "🔋";
+      else if (data.title.toLowerCase().includes("ai") || data.title.toLowerCase().includes("software")) imageEmoji = "💻";
+      imageUrls.push(imageEmoji);
     }
 
     // 3. Insert listing record
@@ -182,9 +206,9 @@ export const action: ActionFunction = async ({ request }) => {
         estimated_value: data.estimatedValue,
         price_credits: data.priceCredits,
         condition: data.condition,
-        images: [imageEmoji],
+        images: imageUrls,
         status: "active",
-        metadata: {},
+        metadata: { r2_upload: validImages.length > 0 && isR2Configured() },
       });
 
     if (insertError) throw insertError;
@@ -192,9 +216,9 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ success: true });
   } catch (error: any) {
     console.error("Listing creation error:", error);
-    return json({ 
-      success: false, 
-      error: error.message || "Failed to create listing" 
+    return json({
+      success: false,
+      error: error.message || "Failed to create listing",
     }, { status: 500 });
   }
 };
@@ -208,6 +232,32 @@ export default function Marketplace() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle image preview
+  const handleImageChange = useCallback((files: FileList | null) => {
+    if (!files) return;
+    const urls: string[] = [];
+    Array.from(files).slice(0, 5).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        urls.push(URL.createObjectURL(file));
+      }
+    });
+    setPreviewUrls(urls);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleImageChange(e.dataTransfer.files);
+    if (fileInputRef.current && e.dataTransfer.files.length > 0) {
+      const dt = new DataTransfer();
+      Array.from(e.dataTransfer.files).forEach((f) => dt.items.add(f));
+      fileInputRef.current.files = dt.files;
+    }
+  }, [handleImageChange]);
 
   // Close modal and reset form on action success
   useEffect(() => {
@@ -280,8 +330,12 @@ export default function Marketplace() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {listings.map((item) => (
             <div key={item.id} className="glass-card p-6 rounded-2xl flex gap-6 items-start">
-              <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl flex-shrink-0">
-                {item.images?.[0] || "📦"}
+              <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden">
+                {item.images?.[0]?.startsWith("http") ? (
+                  <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  item.images?.[0] || "📦"
+                )}
               </div>
               <div className="space-y-4 flex-1 min-w-0">
                 <div className="space-y-1">
@@ -352,7 +406,7 @@ export default function Marketplace() {
               </div>
             )}
 
-            <Form method="post" ref={formRef} className="space-y-4">
+            <Form method="post" encType="multipart/form-data" ref={formRef} className="space-y-4">
               {/* Title */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground" htmlFor="title">
@@ -491,6 +545,66 @@ export default function Marketplace() {
                 </select>
                 {actionData?.errors?.condition && (
                   <p className="text-red-400 text-xs mt-1 font-semibold">{actionData.errors.condition[0]}</p>
+                )}
+              </div>
+
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">
+                  Product Images (รูปภาพสินค้า — สูงสุด 5 รูป, 10MB/รูป)
+                </label>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`w-full border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition ${
+                    isDragging
+                      ? "border-primary bg-primary/10"
+                      : "border-white/15 hover:border-primary/50 bg-white/3"
+                  }`}
+                >
+                  {previewUrls.length > 0 ? (
+                    <div className="flex gap-2 flex-wrap justify-center">
+                      {previewUrls.map((url, i) => (
+                        <img
+                          key={i}
+                          src={url}
+                          alt={`preview-${i}`}
+                          className="w-16 h-16 object-cover rounded-lg border border-white/10"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <div className="text-2xl">🖼️</div>
+                      <p className="text-xs text-muted-foreground">
+                        ลากวางรูปภาพที่นี่ หรือ{" "}
+                        <span className="text-primary font-bold">เลือกไฟล์</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/60">
+                        JPG, PNG, WebP (Max 10MB each)
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleImageChange(e.target.files)}
+                  />
+                </div>
+                {previewUrls.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setPreviewUrls([]); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                    className="text-xs text-muted-foreground hover:text-red-400 transition"
+                  >
+                    ✕ ลบรูปทั้งหมด
+                  </button>
                 )}
               </div>
 

@@ -1,0 +1,165 @@
+name: 🚀 Deploy to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # ── 1. Lint + TypeScript Check ─────────────────────────
+  quality:
+    name: 🔍 Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+  # ── 2. Deploy Cloudflare Workers ───────────────────────
+  deploy-workers:
+    name: ⚡ Deploy Workers Edge Proxy
+    needs: quality
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    defaults:
+      run:
+        working-directory: workers/edge-proxy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: workers/edge-proxy/package-lock.json
+
+      - name: Install Workers dependencies
+        run: npm ci
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/edge-proxy
+          command: deploy ${{ github.ref != 'refs/heads/main' && '--env staging' || '' }}
+
+      - name: Set Worker Secrets
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/edge-proxy
+          command: |
+            secret put EDGE_PROXY_SECRET <<< "${{ secrets.EDGE_PROXY_SECRET }}"
+            secret put RESEND_API_KEY <<< "${{ secrets.RESEND_API_KEY }}"
+            secret put LINE_CHANNEL_ACCESS_TOKEN <<< "${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}"
+            secret put LINE_CHANNEL_SECRET <<< "${{ secrets.LINE_CHANNEL_SECRET }}"
+
+  # ── 3. Build + Deploy Remix to Cloudflare Pages ────────
+  deploy-pages:
+    name: 📄 Deploy Remix App (Cloudflare Pages)
+    needs: quality
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Remix app
+        run: npm run build
+        env:
+          NODE_ENV: production
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
+          LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
+          EDGE_PROXY_URL: ${{ secrets.EDGE_PROXY_URL }}
+          EDGE_PROXY_SECRET: ${{ secrets.EDGE_PROXY_SECRET }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy build/client --project-name=barter-commerce --branch=${{ github.ref_name }}
+
+  # ── 4. Post-deployment Health Check ────────────────────
+  health-check:
+    name: 🩺 Health Check
+    needs: [deploy-workers, deploy-pages]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Check Workers health
+        run: |
+          response=$(curl -sf "${{ secrets.EDGE_PROXY_URL }}/api/health" || echo '{"status":"error"}')
+          echo "Worker health: $response"
+          echo "$response" | grep -q '"status":"ok"' && echo "✅ Workers healthy" || exit 1
+
+      - name: Notify deployment success (LINE)
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.EDGE_PROXY_URL }}/api/notify/line" \
+            -H "X-Edge-Proxy-Secret: ${{ secrets.EDGE_PROXY_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "to": "${{ secrets.LINE_ADMIN_USER_ID }}",
+              "messages": [{
+                "type": "text",
+                "text": "✅ Deploy สำเร็จ!\n\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nTime: '"$(date)"'\n\nGlobal Barter Commerce is live! 🚀"
+              }]
+            }' || echo "LINE notify skipped"

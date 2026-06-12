@@ -1,5 +1,7 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import { getSupabaseClient, supabaseAdmin } from "./supabase.server";
+import { sendWelcomeEmail } from "./resend.server";
+import { notifyAdminNewBusiness } from "./line.server";
 
 // Configure encrypted session cookie storage
 const sessionSecret = process.env.SESSION_SECRET || "default-secret-key-at-least-32-chars-long";
@@ -101,7 +103,17 @@ export async function register({
     throw new Error(businessError.message || "Failed to create business profile");
   }
 
-  // 3. Create session and redirect to dashboard
+  // 3. Send welcome email + LINE alert to admin (non-blocking)
+  Promise.all([
+    sendWelcomeEmail(email, companyName).catch((e) =>
+      console.error("[Auth] Welcome email failed:", e)
+    ),
+    notifyAdminNewBusiness(companyName, email, countryCode || "TH").catch((e) =>
+      console.error("[Auth] LINE admin notify failed:", e)
+    ),
+  ]);
+
+  // 4. Create session and redirect to dashboard
   const session = await getSession(request);
   session.set("userId", userId);
   session.set("accessToken", signUpData.session?.access_token);

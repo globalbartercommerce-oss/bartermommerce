@@ -1,0 +1,26 @@
+name = "barter-edge-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── R2 Bucket Binding ───────────────────────────────────────
+[[r2_buckets]]
+binding = "BARTER_MEDIA"
+bucket_name = "barter-media"
+# preview_bucket_name = "barter-media-preview" # Optional for dev
+
+# ── Environment Variables ───────────────────────────────────
+[vars]
+APP_ENV = "production"
+
+# ── Staging Environment ─────────────────────────────────────
+[env.staging]
+name = "barter-edge-proxy-staging"
+[env.staging.vars]
+APP_ENV = "staging"
+
+# ── Routes ─────────────────────────────────────────────────
+# Uncomment after creating custom domain in Cloudflare dashboard
+# routes = [
+#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+# ]

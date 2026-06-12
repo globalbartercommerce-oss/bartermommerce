@@ -3,6 +3,8 @@ import { json, type LoaderFunction, type ActionFunction } from "@remix-run/node"
 import { useLoaderData, useActionData, useNavigation, Form } from "@remix-run/react";
 import { requireUserId } from "~/utils/auth.server";
 import { supabaseAdmin } from "~/utils/supabase.server";
+import { sendEscrowNotification } from "~/utils/resend.server";
+import { sendEscrowAlert, notifyAdminDispute } from "~/utils/line.server";
 
 interface EscrowRecord {
   id: string;
@@ -208,6 +210,28 @@ export const action: ActionFunction = async ({ request }) => {
         status: "completed"
       });
 
+    // Notify parties via Email + LINE (non-blocking)
+    const { data: ownerBusiness } = await supabaseAdmin
+      .from("businesses")
+      .select("owner_id")
+      .eq("id", escrow.offer?.receiver_business_id)
+      .single();
+    const { data: ownerUser } = ownerBusiness?.owner_id
+      ? await supabaseAdmin.auth.admin.getUserById(ownerBusiness.owner_id)
+      : { data: null };
+
+    Promise.all([
+      sendEscrowNotification(
+        ownerUser?.user?.email ?? "",
+        escrowId,
+        "completed",
+        "Barter Partner",
+        Number(escrow.amount)
+      ).catch((e) => console.error("[Escrow] Release email failed:", e)),
+      sendEscrowAlert(ownerBusiness?.owner_id ?? "", escrowId, "completed", Number(escrow.amount))
+        .catch((e) => console.error("[Escrow] Release LINE failed:", e)),
+    ]);
+
     return json({ success: true, message: "ทำการอนุมัติส่งมอบสินค้าและปล่อยเครดิต Escrow สำเร็จ!" });
 
   } else if (intent === "refund") {
@@ -287,9 +311,11 @@ export const action: ActionFunction = async ({ request }) => {
 
     if (disputeError) return json({ error: disputeError.message }, { status: 500 });
 
-    // Also update barter offer status to disputed/escrowed with details if applicable
-    // In our CHECK constraint for barter_offers, we don't have 'disputed' directly, so we keep 'escrowed' or let it handle via escrow table
-    
+    // Notify Admin via LINE
+    notifyAdminDispute(escrowId, disputeReason).catch((e) =>
+      console.error("[Escrow] Dispute LINE notify failed:", e)
+    );
+
     return json({ success: true, message: "ส่งข้อโต้แย้งข้อพิพาทไปยังฝ่ายดูแลระบบ (Admin) เรียบร้อย!" });
   }
 
