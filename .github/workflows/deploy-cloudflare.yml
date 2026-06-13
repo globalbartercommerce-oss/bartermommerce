@@ -134,7 +134,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/client --project-name=barter-commerce --branch=${{ github.ref_name }}
+          command: pages deploy build/client --project-name=bartermommerce --branch=${{ github.ref_name }}
 
   # ── 4. Post-deployment Health Check ────────────────────
   health-check:
