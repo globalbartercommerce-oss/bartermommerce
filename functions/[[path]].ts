@@ -1,7 +1,7 @@
 import { createPagesFunctionHandler } from "@remix-run/cloudflare-pages";
 import * as build from "../build/server";
 
-export const onRequest = async (context) => {
+export const onRequest = async (context: any) => {
   // Simple shim for process.env
   if (typeof process === "undefined") {
     globalThis.process = { env: context.env } as any;
@@ -10,8 +10,8 @@ export const onRequest = async (context) => {
   }
 
   const handler = createPagesFunctionHandler({
-    build,
-    getLoadContext: (context) => ({ env: context.env }),
+    build: build as any,
+    getLoadContext: (context: any) => ({ env: context.env }),
   });
 
   try {
