@@ -259,7 +259,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-[#070a13] flex flex-col justify-center items-center p-6 selection:bg-primary selection:text-black">
       {/* Background radial highlights */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] -z-10 pointer-events-none" />
 
       {/* Main card */}
       <div className="w-full max-w-2xl glass-panel rounded-3xl p-8 md:p-12 shadow-2xl space-y-8 relative">

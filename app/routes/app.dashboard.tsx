@@ -121,7 +121,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Welcome Banner */}
       <div className="glass-panel p-8 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="space-y-2">
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-sans">
             Welcome Back, <span className="text-gradient-primary">{companyName}</span>
@@ -174,7 +174,7 @@ export default function Dashboard() {
           <div className="space-y-4">
             {aiMatches.map((match) => (
               <div key={match.id} className="glass-card p-6 rounded-2xl space-y-4 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl -z-10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl -z-10 pointer-events-none" />
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-secondary bg-secondary/10 px-2.5 py-0.5 rounded-full">
                     Match Rate: {match.similarity}

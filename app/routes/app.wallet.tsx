@@ -287,7 +287,7 @@ export default function Wallet() {
         {/* Balance Breakdown & Actions */}
         <div className="md:col-span-5 space-y-6">
           <div className="glass-card p-6 rounded-3xl space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -z-10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -z-10 pointer-events-none" />
             <div className="space-y-2">
               <span className="text-xs font-semibold text-muted-foreground uppercase">Unicorn Credits Balance</span>
               <h3 className="text-4xl font-black text-emerald-400 tracking-wider">

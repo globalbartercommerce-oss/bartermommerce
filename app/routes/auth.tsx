@@ -4,7 +4,7 @@ export default function AuthLayout() {
   return (
     <div className="relative min-h-screen bg-background flex flex-col justify-center items-center p-6 overflow-hidden selection:bg-primary selection:text-black">
       {/* Background Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] -z-10 pointer-events-none" />
 
       {/* Header Home Link */}
       <header className="absolute top-8 left-8">
@@ -18,7 +18,7 @@ export default function AuthLayout() {
 
       {/* Main Glass Panel Card */}
       <div className="w-full max-w-md glass-panel rounded-3xl p-8 shadow-2xl relative">
-        <div className="absolute -top-10 -right-10 w-24 h-24 bg-secondary/20 rounded-full blur-2xl -z-10" />
+        <div className="absolute -top-10 -right-10 w-24 h-24 bg-secondary/20 rounded-full blur-2xl -z-10 pointer-events-none" />
         <Outlet />
       </div>
 

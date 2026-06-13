@@ -60,8 +60,7 @@ body {
 .glass-card:hover {
   background: rgba(20, 26, 45, 0.65);
   border-color: rgba(16, 185, 129, 0.25);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.12);
 }
 
 /* Metallic Text Gradients */

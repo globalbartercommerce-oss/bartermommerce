@@ -4,7 +4,7 @@ import type { MetaFunction, HeadersFunction } from "@remix-run/cloudflare";
 
 export const headers: HeadersFunction = () => {
   return {
-    "Cache-Control": "public, max-age=3600, s-maxage=86400",
+    "Cache-Control": "no-store",
   };
 };
 
@@ -437,9 +437,9 @@ export default function Index() {
   return (
     <div className="relative min-h-screen bg-background overflow-hidden selection:bg-primary selection:text-black">
       {/* Background Radial Gradients */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -z-10" />
-      <div className="absolute bottom-20 right-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] -z-10" />
-      <div className="absolute top-1/2 left-2/3 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] -z-10" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-20 right-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] -z-10 pointer-events-none" />
+      <div className="absolute top-1/2 left-2/3 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
 
       {/* Header / Nav */}
       <header className="glass-panel sticky top-0 z-50 w-full border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center">
@@ -659,7 +659,7 @@ export default function Index() {
         {/* Corporate Message (CEO Board) */}
         <section className="mt-36 pt-16 border-t border-white/5">
           <div className="glass-card p-8 md:p-12 rounded-3xl bg-gradient-to-br from-card/80 to-primary/5 border border-white/5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -z-10" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-4 flex flex-col items-center text-center space-y-4">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-extrabold text-white text-3xl shadow-xl shadow-primary/10 border border-white/10">
