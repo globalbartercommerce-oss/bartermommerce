@@ -8,7 +8,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
 
   // If already on the onboarding page, do not guard redirect to prevent infinite loops
-  if (url.pathname === "/app/onboarding") {
+  if (url.pathname.replace(/\/$/, "") === "/app/onboarding") {
     return json({ user: { id: userId }, business: null, wallet: null });
   }
 
